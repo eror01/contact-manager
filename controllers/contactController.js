@@ -13,9 +13,9 @@ const getContacts = asyncHandler(async (req, res) => {
 //@route POST /api/contacts/
 //@access private
 const createContact = asyncHandler(async (req, res) => {
-  console.log("The request body is:", req.body);
   const { name, email, phone } = req.body;
-  if(!name || !email || !phone) {
+  const mandatoryFields = !name || !email || !phone;
+  if(mandatoryFields) {
     res.status(400);
     throw new Error('All fields are mandatory');
   }
@@ -52,7 +52,9 @@ const updateContact = asyncHandler(async (req, res) => {
     throw new Error('Contact not found')
   }
 
-  if(contact.user_id.toString() !== req.user.id) {
+  const checkUser = contact.user_id.toString() !== req.user.id;
+  
+  if(checkUser) {
     res.status(403);
     throw new Error("User don't have permission to update other use contacts")
   }
@@ -76,7 +78,9 @@ const deleteContact = asyncHandler(async (req, res) => {
     throw new Error('Contact not found')
   }
 
-  if(contact.user_id.toString() !== req.user.id) {
+  const checkUser = contact.user_id.toString() !== req.user.id;
+
+  if(checkUser) {
     res.status(403);
     throw new Error("User don't have permission to update other user contacts")
   }

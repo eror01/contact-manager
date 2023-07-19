@@ -8,7 +8,9 @@ const jwt = require('jsonwebtoken')
 //@access public
 const registerUser = asyncHandler(async (req, res) => {
   const { username, email, password } = req.body;
-  if(!username || !email || !password) {
+  
+  const mandatoryFields = !username || !email || !password;
+  if(mandatoryFields) {
     res.status(400);
     throw new Error('All fields are mandatory');
   }
@@ -41,12 +43,16 @@ const registerUser = asyncHandler(async (req, res) => {
 //@access public
 const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
-  if(!email || !password) {
+  const mandatoryFields = !email || !password;
+  
+  if(mandatoryFields) {
     res.status(400)
     throw new Error('All fields are mandatory!');
   }
+
   const user = await User.findOne({email});
-  if(user && (await bcyrpt.compare(password, user.password))) {
+  const checkUserPassword = user && (await bcyrpt.compare(password, user.password));
+  if(checkUserPassword) {
     const accessToken = jwt.sign({
       user: {
         username: user.username,
@@ -67,8 +73,6 @@ const loginUser = asyncHandler(async (req, res) => {
 //@desc Current User Info
 //@route POST /api/users/current
 //@access private
-const currentUser = asyncHandler(async (req, res) => {
-  res.json(req.user);
-});
+const currentUser = asyncHandler(async (req, res) => res.json(req.user) );
 
 module.exports = { registerUser, loginUser, currentUser }
